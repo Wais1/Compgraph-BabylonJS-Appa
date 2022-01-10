@@ -57,12 +57,11 @@
 
             // Define gravity and physics engine
             scene.enablePhysics();
-
+            
             // Set gravity to 0
             scene.getPhysicsEngine().setGravity(new BABYLON.Vector3(0, 0, 0));
             
 
-            
 
             var light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(10, 50, 50), scene);
 
@@ -78,6 +77,11 @@
             camera.ellipsoid = new BABYLON.Vector3(.4, .8, .4);
             camera.checkCollisions = true;
             camera.attachControl(canvas, true);
+
+            // Declare global appa var
+            var appa;
+
+
 
             //Hero
             var hero = BABYLON.Mesh.CreateBox('hero', 2.0, scene, false, BABYLON.Mesh.FRONTSIDE);
@@ -160,9 +164,22 @@
                     //let stats = document.getElementById("stats");
                     //stats.innerHTML = "";             
 
+
                 camera.position.x = hero.position.x;
                 camera.position.y = hero.position.y + 5.0;
                 camera.position.z = hero.position.z - 2.0;
+
+                // Update apppa position to hero position
+
+                // If appa is ready
+
+                if(appa) {  
+                    appa.position.x = hero.position.x;
+                    appa.position.y = hero.position.y;
+                    appa.position.z = hero.position.z;
+                }
+
+
                 pointer.position = camera.getTarget();
 
                 var forward = camera.getTarget().subtract(camera.position).normalize();
@@ -170,7 +187,7 @@
                 var right = BABYLON.Vector3.Cross(forward, camera.upVector).normalize();
                 right.y = 0;
                 
-                var SPEED = 20;
+                var SPEED = 3;
                 let f_speed = 0;
                 var s_speed = 0;
                 var u_speed = 0;			
@@ -196,6 +213,48 @@
                 hero.physicsImpostor.physicsBody.velocity.z = move.z;
                 hero.physicsImpostor.physicsBody.velocity.y = move.y;
             });
+
+            
+            //Mouse
+            // Start without cursor lock in first person
+            var isLocked = false;
+            
+            // On click lock the pointer POV
+            scene.onPointerDown = function (evt) {
+                
+                //true/false check if we're locked, faster than checking pointerlock on each single click.
+                if (!isLocked) {
+                    canvas.requestPointerLock = canvas.requestPointerLock || canvas.msRequestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
+                    if (canvas.requestPointerLock) {
+                        canvas.requestPointerLock();
+                    }
+                }
+                
+                //continue with shooting requests
+                //evt === 1 (mouse wheel click (not scrolling))
+                //evt === 2 (right mouse click)
+            };
+            
+
+            // Event listener when the pointerlock is updated (or removed by pressing ESC for example).
+            var pointerlockchange = function () {
+                var controlEnabled = document.mozPointerLockElement || document.webkitPointerLockElement || document.msPointerLockElement || document.pointerLockElement || null;
+                
+                // If the user is already locked
+                if (!controlEnabled) {
+                    //camera.detachControl(canvas);
+                    isLocked = false;
+                } else {
+                    //camera.attachControl(canvas);
+                    isLocked = true;
+                }
+            };
+            
+            // Attach events to the document
+            document.addEventListener("pointerlockchange", pointerlockchange, false);
+            document.addEventListener("mspointerlockchange", pointerlockchange, false);
+            document.addEventListener("mozpointerlockchange", pointerlockchange, false);
+            document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
                 
             
             // // Fog
@@ -231,12 +290,17 @@
         
             });
 
-            // Load Appa model
-            // here the doc for Load function: //doc.babylonjs.com/api/classes/babylon.sceneloader#load
+        //     // Load Appa model
+        //     // here the doc for Load function: //doc.babylonjs.com/api/classes/babylon.sceneloader#load
             BABYLON.SceneLoader.Append("", "appa.glb", scene, function () {
                 scene.createDefaultCamera(false, false, false);
+
+                // Access appa through node
+                appa = scene.getMeshByName("__root__");
+
                 scene.createDefaultEnvironment({
                     
+
                     
                 createGround: false,
                 createSkybox: true,
@@ -249,7 +313,32 @@
                 window.addEventListener("resize", function () {
                 engine.resize();
                 });
+
+                
         });
+
+
+        // // // The first parameter can be used to specify which mesh to import. Here we import all meshes
+        // BABYLON.SceneLoader.ImportMesh("", "./", "appa.glb", scene, function (newMeshes) {
+        //     appa = newMeshes[0];
+        //     appa.position.x = 6.0;
+        //     appa.position.y = 6.0;
+        //     appa.position.z = 3.0;
+
+        //     const myMesh1 = scene.getMeshByName("__root__");
+        //     myMesh1.position.x = 100;
+
+        //     camera.target = appa;
+        // });	
+
+        // BABYLON.SceneLoader.ImportMeshAsync("", "/relative path/", "myFile").then((result) => {
+        //     result.meshes[1].position.x = 20;
+        //     const myMesh1 = scene.getMeshByName("myMesh_1");
+        //     myMesh1.rotation.y = Math.PI / 2;
+        // });
+
+        scene.debugLayer.show();
+
 
         
             return scene;
