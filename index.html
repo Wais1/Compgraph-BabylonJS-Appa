@@ -59,9 +59,11 @@
             var scene = new BABYLON.Scene(engine);
 
             var light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(10, 50, 50), scene);
-            var camera = new BABYLON.ArcRotateCamera("Camera", 0.4, 1.2, 20, new BABYLON.Vector3(-10, 0, 0), scene);
-        
+            var camera = new BABYLON.ArcRotateCamera("Camera", 0.4, 1.2, 20, new BABYLON.Vector3(0, 0, 0), scene);
+
             camera.attachControl(canvas, true);
+
+
             
             // // Fog
             // scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
@@ -99,7 +101,7 @@
             // Load Appa model
             // here the doc for Load function: //doc.babylonjs.com/api/classes/babylon.sceneloader#load
             BABYLON.SceneLoader.Append("", "appa.glb", scene, function () {
-                scene.createDefaultCamera(true, true, true);
+                scene.createDefaultCamera(false, false, false);
                 scene.createDefaultEnvironment({
                     
                     
