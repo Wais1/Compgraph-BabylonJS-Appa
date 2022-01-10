@@ -19,7 +19,11 @@
         <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
         <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
         <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
-
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+        <script src="https://preview.babylonjs.com/gltf_validator.js"></script>
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
         <style>
             html, body {
                 overflow: hidden;
@@ -41,40 +45,24 @@
     <script>
         var canvas = document.getElementById("renderCanvas");
 
-        var engine = null;
-        var scene = null;
-        var sceneToRender = null;
-        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
-        var createScene = function () {
-    // This creates a basic Babylon Scene object (non-mesh)
-    var scene = new BABYLON.Scene(engine);
+        var engine = new BABYLON.Engine(canvas, true);
 
-    // This creates and positions a free camera (non-mesh)
-    var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+      // here the doc for Load function: //doc.babylonjs.com/api/classes/babylon.sceneloader#load
+      BABYLON.SceneLoader.Load("", "appa.glb", engine, function (scene) {
+        scene.createDefaultCamera(true, true, true);
+        scene.createDefaultEnvironment({
+          createGround: false,
+          createSkybox: false,
+        });
 
-    // This targets the camera to scene origin
-    camera.setTarget(BABYLON.Vector3.Zero());
+        engine.runRenderLoop(function () {
+          scene.render();
+        });
 
-    // This attaches the camera to the canvas
-    camera.attachControl(canvas, true);
-
-    // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-    var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-
-    // Default intensity is 1. Let's dim the light a small amount
-    light.intensity = 0.7;
-
-    // Our built-in 'sphere' shape.
-    var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2, segments: 32}, scene);
-
-    // Move the sphere upward 1/2 its height
-    sphere.position.y = 1;
-
-    // Our built-in 'ground' shape.
-    var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 6, height: 6}, scene);
-
-    return scene;
-};
+        window.addEventListener("resize", function () {
+          engine.resize();
+        });
+      });
                 window.initFunction = async function() {
                     
                     
