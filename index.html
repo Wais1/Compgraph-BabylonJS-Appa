@@ -47,10 +47,7 @@
     <canvas id="renderCanvas"></canvas>
     <script>
         var canvas = document.getElementById("renderCanvas");
-
         var engine = null;
-
-
 
         // var scene = null;
         // var sceneToRender = null;
@@ -58,12 +55,148 @@
         function createScene() {
             var scene = new BABYLON.Scene(engine);
 
-            var light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(10, 50, 50), scene);
-            var camera = new BABYLON.ArcRotateCamera("Camera", 0.4, 1.2, 20, new BABYLON.Vector3(0, 0, 0), scene);
+            // Define gravity and physics engine
+            scene.enablePhysics();
 
+            // Set gravity to 0
+            scene.getPhysicsEngine().setGravity(new BABYLON.Vector3(0, 0, 0));
+            
+
+            
+
+            var light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(10, 50, 50), scene);
+
+
+            // Parameters : name, position, scene
+            var camera = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(0, 2, -25), scene);
+
+            // Targets the camera to a particular position. In this case the scene origin
+            camera.setTarget(BABYLON.Vector3.Zero());
+
+            // Attach the camera to the canvas
+            camera.applyGravity = false;
+            camera.ellipsoid = new BABYLON.Vector3(.4, .8, .4);
+            camera.checkCollisions = true;
             camera.attachControl(canvas, true);
 
+            //Hero
+            var hero = BABYLON.Mesh.CreateBox('hero', 2.0, scene, false, BABYLON.Mesh.FRONTSIDE);
+                hero.position.x = 0.0;
+                hero.position.y = 1.0;
+                hero.position.z = 0.0;
+                hero.physicsImpostor = new BABYLON.PhysicsImpostor(hero, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0.0, friction: 0.1 }, scene);		
+                // hero.physicsImpostor.physicsBody.fixedRotation = false;
+                // hero.physicsImpostor.physicsBody.updateMassProperties();
 
+                // pointer
+                var pointer = BABYLON.Mesh.CreateSphere("Sphere", 16.0, 0.01, scene, false, BABYLON.Mesh.DOUBLESIDE);
+                // move the sphere upward 1/2 of its height
+                pointer.position.x = 0.0;
+                pointer.position.y = 0.0;
+                pointer.position.z = 0.0;
+                pointer.isPickable = false;
+
+                var moveForward = false;
+                var moveBackward = false;
+                var moveRight = false;
+                var moveLeft = false;
+
+                var onKeyDown = function (event) {
+                switch (event.keyCode) {
+                    case 38: // up
+                    case 87: // w
+                        moveForward = true;
+                        break;
+
+                    case 37: // left
+                    case 65: // a
+                        moveLeft = true; break;
+
+                    case 40: // down
+                    case 83: // s
+                        moveBackward = true;
+                        break;
+
+                    case 39: // right
+                    case 68: // d
+                        moveRight = true;
+                        break;
+
+                    case 32: // space
+                        break;
+                }
+            };
+
+            var onKeyUp = function (event) {
+                switch (event.keyCode) {
+                    case 38: // up
+                    case 87: // w
+                        moveForward = false;
+                        break;
+
+                    case 37: // left
+                    case 65: // a
+                        moveLeft = false;
+                        break;
+
+                    case 40: // down
+                    case 83: // a
+                        moveBackward = false;
+                        break;
+
+                    case 39: // right
+                    case 68: // d
+                        moveRight = false;
+                        break;
+                }
+            };
+
+            document.addEventListener('keydown', onKeyDown, false);
+            document.addEventListener('keyup', onKeyUp, false);
+                    
+            scene.registerBeforeRender(function () {
+                //Your code here
+                //Step
+                    //let stats = document.getElementById("stats");
+                    //stats.innerHTML = "";             
+
+                camera.position.x = hero.position.x;
+                camera.position.y = hero.position.y + 5.0;
+                camera.position.z = hero.position.z - 2.0;
+                pointer.position = camera.getTarget();
+
+                var forward = camera.getTarget().subtract(camera.position).normalize();
+                forward.y = 0;
+                var right = BABYLON.Vector3.Cross(forward, camera.upVector).normalize();
+                right.y = 0;
+                
+                var SPEED = 20;
+                let f_speed = 0;
+                var s_speed = 0;
+                var u_speed = 0;			
+
+                if (moveForward) {
+                    f_speed = SPEED;
+                }
+                if (moveBackward) {
+                    f_speed = -SPEED;
+                }
+
+                if (moveRight) {
+                    s_speed = SPEED;
+                }
+
+                if (moveLeft) {
+                    s_speed = -SPEED;
+                }
+                
+                var move = (forward.scale(f_speed)).subtract((right.scale(s_speed))).subtract(camera.upVector.scale(u_speed));
+        
+                hero.physicsImpostor.physicsBody.velocity.x = move.x;
+                hero.physicsImpostor.physicsBody.velocity.z = move.z;
+                hero.physicsImpostor.physicsBody.velocity.y = move.y;
+            });
+                
             
             // // Fog
             // scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
