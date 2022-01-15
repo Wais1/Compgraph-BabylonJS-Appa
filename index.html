@@ -1,327 +1,416 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-        <title>Flying Appa Simulator</title>
+    <title>Flying Appa Simulator</title>
 
-        <!-- Babylon.js -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
-        <script src="https://preview.babylonjs.com/ammo.js"></script>
-        <script src="https://preview.babylonjs.com/cannon.js"></script>
-        <script src="https://preview.babylonjs.com/Oimo.js"></script>
-        <script src="https://preview.babylonjs.com/earcut.min.js"></script>
-        <script src="https://preview.babylonjs.com/babylon.js"></script>
-        <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
-        <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
-        <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
-        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
-        <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
-        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
-        <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+    <!-- Babylon.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+    <script src="https://preview.babylonjs.com/ammo.js"></script>
+    <script src="https://preview.babylonjs.com/cannon.js"></script>
+    <script src="https://preview.babylonjs.com/Oimo.js"></script>
+    <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+    <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+    <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+    <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
 
-        <!-- Added scripts to import models -->
-        <script src="https://cdn.babylonjs.com/babylon.js"></script>
-        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-        <script src="https://preview.babylonjs.com/gltf_validator.js"></script>
-        <script src="https://preview.babylonjs.com/babylon.js"></script>
-        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <!-- Added scripts to import models -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://preview.babylonjs.com/gltf_validator.js"></script>
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 
-        <style>
-            html, body {
-                overflow: hidden;
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
 
-            #renderCanvas {
-                width: 100%;
-                height: 100%;
-                touch-action: none;
-            }
-        </style>
-    </head>
-<body>
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body>
     <canvas id="renderCanvas"></canvas>
     <script>
-        var canvas = document.getElementById("renderCanvas");
-        var engine = null;
+      var canvas = document.getElementById("renderCanvas");
+      var engine = null;
 
-        // var scene = null;
-        // var sceneToRender = null;
-        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
-        function createScene() {
-            var scene = new BABYLON.Scene(engine);
+      // var scene = null;
+      // var sceneToRender = null;
+      var createDefaultEngine = function () {
+        return new BABYLON.Engine(canvas, true, {
+          preserveDrawingBuffer: true,
+          stencil: true,
+          disableWebGL2Support: false,
+        });
+      };
+      function createScene() {
+        var scene = new BABYLON.Scene(engine);
 
-            // Define gravity and physics engine
-            scene.enablePhysics();
-            
-            // Set gravity to 0
-            scene.getPhysicsEngine().setGravity(new BABYLON.Vector3(0, 0, 0));
-            
+        // Define gravity and physics engine
+        scene.enablePhysics();
 
+        // Set gravity to 0
+        scene.getPhysicsEngine().setGravity(new BABYLON.Vector3(0, 0, 0));
 
-            var light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(10, 50, 50), scene);
+        var light = new BABYLON.PointLight(
+          "Omni",
+          new BABYLON.Vector3(10, 50, 50),
+          scene
+        );
 
+        // Parameters : name, position, scene
+        var camera = new BABYLON.UniversalCamera(
+          "UniversalCamera",
+          new BABYLON.Vector3(0, 2, -25),
+          scene
+        );
 
-            // Parameters : name, position, scene
-            var camera = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(0, 2, -25), scene);
+        // Targets the camera to a particular position. In this case the scene origin
+        camera.setTarget(BABYLON.Vector3.Zero());
 
-            // Targets the camera to a particular position. In this case the scene origin
-            camera.setTarget(BABYLON.Vector3.Zero());
+        // Attach the camera to the canvas
+        camera.applyGravity = false;
+        camera.ellipsoid = new BABYLON.Vector3(0.4, 0.8, 0.4);
+        camera.checkCollisions = true;
+        camera.attachControl(canvas, true);
 
-            // Attach the camera to the canvas
-            camera.applyGravity = false;
-            camera.ellipsoid = new BABYLON.Vector3(.4, .8, .4);
-            camera.checkCollisions = true;
-            camera.attachControl(canvas, true);
+        // Declare global appa var
+        var appa;
 
-            // Declare global appa var
-            var appa;
+        // Initialize glboal RGB emissive variables to adjust dynamically on Appa's movement
+        var r = 0;
+        var b = 0;
+        var g = 0;
+        const increment = 0.015;
 
+        // Decide whether to add or subtract RGB values randomly by increment
+        const updateRGB = (rgb) => {
+          // Check limits
+          if (rgb > 1) {
+            return rgb - increment;
+          } else if (rgb < 0) {
+            return rgb + increment;
+          }
 
+          const randIncrement = Math.random();
+          rgb = randIncrement < 0.5 ? rgb - increment : rgb + increment;
+          return rgb;
+        };
 
-            //Hero
-            var hero = BABYLON.Mesh.CreateBox('hero', 2.0, scene, false, BABYLON.Mesh.FRONTSIDE);
-                hero.position.x = 0.0;
-                hero.position.y = 1.0;
-                hero.position.z = 0.0;
-                hero.physicsImpostor = new BABYLON.PhysicsImpostor(hero, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0.0, friction: 0.1 }, scene);		
-                // hero.physicsImpostor.physicsBody.fixedRotation = false;
-                // hero.physicsImpostor.physicsBody.updateMassProperties();
+        // Update emissive background color every 5 seconds
+        const updateBackgroundColor = () => {
+            // Dynamically adjust skybox emissive coloring to simulate animation on movement.
+            const rand = Math.random();
 
-                // pointer
-                var pointer = BABYLON.Mesh.CreateSphere("Sphere", 16.0, 0.01, scene, false, BABYLON.Mesh.DOUBLESIDE);
-                // move the sphere upward 1/2 of its height
-                pointer.position.x = 0.0;
-                pointer.position.y = 0.0;
-                pointer.position.z = 0.0;
-                pointer.isPickable = false;
+            // Depending on random value, decide which value to increment (R, G, B) by global variable 'increment'
+            r = rand < 0.33 ? (r = updateRGB(r)) : r;
+            g = rand < 0.66 && rand > 0.33 ? (g = updateRGB(g)) : g;
+            b = rand > 0.66 ? (b = updateRGB(b)) : b;
 
-                var moveForward = false;
-                var moveBackward = false;
-                var moveRight = false;
-                var moveLeft = false;
+            // Update new skybox emissive color
+            skyboxMaterial.emissiveColor = new BABYLON.Color3(r, g, b);
+            console.log(skyboxMaterial.emissiveColor);
+        }
 
-                var onKeyDown = function (event) {
-                switch (event.keyCode) {
-                    case 38: // up
-                    case 87: // w
-                        moveForward = true;
-                        break;
-
-                    case 37: // left
-                    case 65: // a
-                        moveLeft = true; break;
-
-                    case 40: // down
-                    case 83: // s
-                        moveBackward = true;
-                        break;
-
-                    case 39: // right
-                    case 68: // d
-                        moveRight = true;
-                        break;
-
-                    case 32: // space
-                        break;
-                }
-            };
-
-            var onKeyUp = function (event) {
-                switch (event.keyCode) {
-                    case 38: // up
-                    case 87: // w
-                        moveForward = false;
-                        break;
-
-                    case 37: // left
-                    case 65: // a
-                        moveLeft = false;
-                        break;
-
-                    case 40: // down
-                    case 83: // a
-                        moveBackward = false;
-                        break;
-
-                    case 39: // right
-                    case 68: // d
-                        moveRight = false;
-                        break;
-                }
-            };
-
-            document.addEventListener('keydown', onKeyDown, false);
-            document.addEventListener('keyup', onKeyUp, false);
-                    
-            scene.registerBeforeRender(function () {
-                //Your code here
-                //Step
-                    //let stats = document.getElementById("stats");
-                    //stats.innerHTML = "";             
+        // Updates updateBackgroundColor every half a second
+        const interval = setInterval(updateBackgroundColor, 500);
 
 
-                camera.position.x = hero.position.x;
-                camera.position.y = hero.position.y + 5.0;
-                camera.position.z = hero.position.z - 2.0;
+        //Hero
+        var hero = BABYLON.Mesh.CreateBox(
+          "hero",
+          2.0,
+          scene,
+          false,
+          BABYLON.Mesh.FRONTSIDE
+        );
+        hero.position.x = 0.0;
+        hero.position.y = 1.0;
+        hero.position.z = 0.0;
+        hero.physicsImpostor = new BABYLON.PhysicsImpostor(
+          hero,
+          BABYLON.PhysicsImpostor.BoxImpostor,
+          { mass: 1, restitution: 0.0, friction: 0.1 },
+          scene
+        );
+        // hero.physicsImpostor.physicsBody.fixedRotation = false;
+        // hero.physicsImpostor.physicsBody.updateMassProperties();
 
-                // Update apppa position to hero position
+        // pointer
+        var pointer = BABYLON.Mesh.CreateSphere(
+          "Sphere",
+          16.0,
+          0.01,
+          scene,
+          false,
+          BABYLON.Mesh.DOUBLESIDE
+        );
+        // move the sphere upward 1/2 of its height
+        pointer.position.x = 0.0;
+        pointer.position.y = 0.0;
+        pointer.position.z = 0.0;
+        pointer.isPickable = false;
 
-                // If appa is ready
+        var moveForward = false;
+        var moveBackward = false;
+        var moveRight = false;
+        var moveLeft = false;
 
-                if(appa) {  
-                    appa.position.x = hero.position.x;
-                    appa.position.y = hero.position.y;
-                    appa.position.z = hero.position.z;
-                }
+        // Hero movement key codes
+        var onKeyDown = function (event) {
+          switch (event.keyCode) {
+            case 38: // up
+            case 87: // w
+              moveForward = true;
+              break;
 
+            case 37: // left
+            case 65: // a
+              moveLeft = true;
+              break;
 
-                pointer.position = camera.getTarget();
+            case 40: // down
+            case 83: // s
+              moveBackward = true;
+              break;
 
-                var forward = camera.getTarget().subtract(camera.position).normalize();
-                forward.y = 0;
-                var right = BABYLON.Vector3.Cross(forward, camera.upVector).normalize();
-                right.y = 0;
-                
-                var SPEED = 3;
-                let f_speed = 0;
-                var s_speed = 0;
-                var u_speed = 0;			
+            case 39: // right
+            case 68: // d
+              moveRight = true;
+              break;
 
-                if (moveForward) {
-                    f_speed = SPEED;
-                }
-                if (moveBackward) {
-                    f_speed = -SPEED;
-                }
+            case 32: // space
+              break;
+          }
+        };
 
-                if (moveRight) {
-                    s_speed = SPEED;
-                }
+        var onKeyUp = function (event) {
+          switch (event.keyCode) {
+            case 38: // up
+            case 87: // w
+              moveForward = false;
+              break;
 
-                if (moveLeft) {
-                    s_speed = -SPEED;
-                }
-                
-                var move = (forward.scale(f_speed)).subtract((right.scale(s_speed))).subtract(camera.upVector.scale(u_speed));
-        
-                hero.physicsImpostor.physicsBody.velocity.x = move.x;
-                hero.physicsImpostor.physicsBody.velocity.z = move.z;
-                hero.physicsImpostor.physicsBody.velocity.y = move.y;
-            });
+            case 37: // left
+            case 65: // a
+              moveLeft = false;
+              break;
 
-            
-            //Mouse
-            // Start without cursor lock in first person
-            var isLocked = false;
-            
-            // On click lock the pointer POV
-            scene.onPointerDown = function (evt) {
-                
-                //true/false check if we're locked, faster than checking pointerlock on each single click.
-                if (!isLocked) {
-                    canvas.requestPointerLock = canvas.requestPointerLock || canvas.msRequestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
-                    if (canvas.requestPointerLock) {
-                        canvas.requestPointerLock();
-                    }
-                }
-                
-                //continue with shooting requests
-                //evt === 1 (mouse wheel click (not scrolling))
-                //evt === 2 (right mouse click)
-            };
-            
+            case 40: // down
+            case 83: // a
+              moveBackward = false;
+              break;
 
-            // Event listener when the pointerlock is updated (or removed by pressing ESC for example).
-            var pointerlockchange = function () {
-                var controlEnabled = document.mozPointerLockElement || document.webkitPointerLockElement || document.msPointerLockElement || document.pointerLockElement || null;
-                
-                // If the user is already locked
-                if (!controlEnabled) {
-                    //camera.detachControl(canvas);
-                    isLocked = false;
-                } else {
-                    //camera.attachControl(canvas);
-                    isLocked = true;
-                }
-            };
-            
-            // Attach events to the document
-            document.addEventListener("pointerlockchange", pointerlockchange, false);
-            document.addEventListener("mspointerlockchange", pointerlockchange, false);
-            document.addEventListener("mozpointerlockchange", pointerlockchange, false);
-            document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
-                
-            
-            // // Fog
-            // scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
-            // //BABYLON.Scene.FOGMODE_NONE;
-            // //BABYLON.Scene.FOGMODE_EXP;
-            // //BABYLON.Scene.FOGMODE_EXP2;
-            // //BABYLON.Scene.FOGMODE_LINEAR;
-        
-            // scene.fogColor = new BABYLON.Color3(0.95, 0.95, 0.95);
-            // scene.fogDensity = 0.01;
-        
-            //Only if LINEAR
-            //scene.fogStart = 20.0;
-            //scene.fogEnd = 60.0;
-        
-            // Skybox
-            var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene);
+            case 39: // right
+            case 68: // d
+              moveRight = false;
+              break;
+          }
+        };
 
-            // Adjust skybox scaling
-            skybox.scaling = new BABYLON.Vector3(50, 40, 50);
+        document.addEventListener("keydown", onKeyDown, false);
+        document.addEventListener("keyup", onKeyUp, false);
 
-            var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+        scene.registerBeforeRender(function () {
+          // Update camera's position to hero positoin
+          camera.position.x = hero.position.x;
+          camera.position.y = hero.position.y + 5.0;
+          camera.position.z = hero.position.z - 2.0;
 
-            skyboxMaterial.backFaceCulling = false;
-            skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene);
-            skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-            skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-            skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-            skyboxMaterial.disableLighting = true;
-            skybox.material = skyboxMaterial;
-        
-            var alpha = 0;
-            scene.registerBeforeRender(function () {
-        
-                scene.fogDensity = Math.cos(alpha) / 10;
-                alpha += 0.02;
-        
-            });
+          // Update apppa position to hero position if appa model is loaded
+          if (appa) {
+            // Adjust appa's position to the hero
+            appa.position.x = hero.position.x;
+            appa.position.y = hero.position.y;
+            appa.position.z = hero.position.z;
+          }
+
+          pointer.position = camera.getTarget();
+
+          var forward = camera
+            .getTarget()
+            .subtract(camera.position)
+            .normalize();
+          forward.y = 0;
+          var right = BABYLON.Vector3.Cross(
+            forward,
+            camera.upVector
+          ).normalize();
+          right.y = 0;
+
+          // Speed of main character
+          var SPEED = 35;
+          let f_speed = 0;
+          var s_speed = 0;
+          var u_speed = 0;
+
+          if (moveForward) {
+            f_speed = SPEED;
+          }
+          if (moveBackward) {
+            f_speed = -SPEED;
+          }
+
+          if (moveRight) {
+            s_speed = SPEED;
+          }
+
+          if (moveLeft) {
+            s_speed = -SPEED;
+          }
+
+          var move = forward
+            .scale(f_speed)
+            .subtract(right.scale(s_speed))
+            .subtract(camera.upVector.scale(u_speed));
+
+          hero.physicsImpostor.physicsBody.velocity.x = move.x;
+          hero.physicsImpostor.physicsBody.velocity.z = move.z;
+          hero.physicsImpostor.physicsBody.velocity.y = move.y;
+        });
+
+        //Mouse
+        // Start without cursor lock in first person
+        var isLocked = false;
+
+        // On click lock the pointer POV
+        scene.onPointerDown = function (evt) {
+          //true/false check if we're locked, faster than checking pointerlock on each single click.
+          if (!isLocked) {
+            canvas.requestPointerLock =
+              canvas.requestPointerLock ||
+              canvas.msRequestPointerLock ||
+              canvas.mozRequestPointerLock ||
+              canvas.webkitRequestPointerLock;
+            if (canvas.requestPointerLock) {
+              canvas.requestPointerLock();
+            }
+          }
+
+          //continue with shooting requests
+          //evt === 1 (mouse wheel click (not scrolling))
+          //evt === 2 (right mouse click)
+        };
+
+        // Event listener when the pointerlock is updated (or removed by pressing ESC for example).
+        var pointerlockchange = function () {
+          var controlEnabled =
+            document.mozPointerLockElement ||
+            document.webkitPointerLockElement ||
+            document.msPointerLockElement ||
+            document.pointerLockElement ||
+            null;
+
+          // If the user is already locked
+          if (!controlEnabled) {
+            //camera.detachControl(canvas);
+            isLocked = false;
+          } else {
+            //camera.attachControl(canvas);
+            isLocked = true;
+          }
+        };
+
+        // Attach events to the document
+        document.addEventListener(
+          "pointerlockchange",
+          pointerlockchange,
+          false
+        );
+        document.addEventListener(
+          "mspointerlockchange",
+          pointerlockchange,
+          false
+        );
+        document.addEventListener(
+          "mozpointerlockchange",
+          pointerlockchange,
+          false
+        );
+        document.addEventListener(
+          "webkitpointerlockchange",
+          pointerlockchange,
+          false
+        );
+
+        // // Fog
+        // scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
+        // //BABYLON.Scene.FOGMODE_NONE;
+        // //BABYLON.Scene.FOGMODE_EXP;
+        // //BABYLON.Scene.FOGMODE_EXP2;
+        // //BABYLON.Scene.FOGMODE_LINEAR;
+
+        // scene.fogColor = new BABYLON.Color3(0.95, 0.95, 0.95);
+        // scene.fogDensity = 0.01;
+
+        //Only if LINEAR
+        //scene.fogStart = 20.0;
+        //scene.fogEnd = 60.0;
+
+        // Skybox
+        var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene);
+
+        // Adjust skybox scaling
+        skybox.scaling = new BABYLON.Vector3(50, 40, 50);
+
+        // Skybox material
+        var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+        skyboxMaterial.backFaceCulling = false;
+        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(
+          "textures/skybox",
+          scene
+        );
+        skyboxMaterial.reflectionTexture.coordinatesMode =
+          BABYLON.Texture.SKYBOX_MODE;
+        skyboxMaterial.diffuseColor = new BABYLON.Color3(50, 40, 20);
+        skyboxMaterial.emissiveColor = new BABYLON.Color3(0, 0, 0);
+        skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+        skyboxMaterial.disableLighting = true;
+        skybox.material = skyboxMaterial;
+
+        var alpha = 0;
+        scene.registerBeforeRender(function () {
+          scene.fogDensity = Math.cos(alpha) / 10;
+          alpha += 0.02;
+        });
 
         //     // Load Appa model
         //     // here the doc for Load function: //doc.babylonjs.com/api/classes/babylon.sceneloader#load
-            BABYLON.SceneLoader.Append("", "appa.glb", scene, function () {
-                scene.createDefaultCamera(false, false, false);
+        BABYLON.SceneLoader.Append("", "appa.glb", scene, function () {
+          scene.createDefaultCamera(false, false, false);
 
-                // Access appa through node
-                appa = scene.getMeshByName("__root__");
+          // Access appa through node
+          appa = scene.getMeshByName("__root__");
 
-                scene.createDefaultEnvironment({
-                    
+          scene.createDefaultEnvironment({
+            createGround: false,
+            createSkybox: true,
+          });
 
-                    
-                createGround: false,
-                createSkybox: true,
-                });
+          engine.runRenderLoop(function () {
+            scene.render();
+          });
 
-                engine.runRenderLoop(function () {
-                scene.render();
-                });
-
-                window.addEventListener("resize", function () {
-                engine.resize();
-                });
-
-                
+          window.addEventListener("resize", function () {
+            engine.resize();
+          });
         });
-
 
         // // // The first parameter can be used to specify which mesh to import. Here we import all meshes
         // BABYLON.SceneLoader.ImportMesh("", "./", "appa.glb", scene, function (newMeshes) {
@@ -334,7 +423,7 @@
         //     myMesh1.position.x = 100;
 
         //     camera.target = appa;
-        // });	
+        // });
 
         // BABYLON.SceneLoader.ImportMeshAsync("", "/relative path/", "myFile").then((result) => {
         //     result.meshes[1].position.x = 20;
@@ -344,37 +433,37 @@
 
         scene.debugLayer.show();
 
-
-        
-            return scene;
+        return scene;
+      }
+      window.initFunction = async function () {
+        var asyncEngineCreation = async function () {
+          try {
+            return createDefaultEngine();
+          } catch (e) {
+            console.log(
+              "the available createEngine function failed. Creating the default engine instead"
+            );
+            return createDefaultEngine();
+          }
         };
-                window.initFunction = async function() {
-                    
-                    
-                    var asyncEngineCreation = async function() {
-                        try {
-                        return createDefaultEngine();
-                        } catch(e) {
-                        console.log("the available createEngine function failed. Creating the default engine instead");
-                        return createDefaultEngine();
-                        }
-                    }
 
-                    window.engine = await asyncEngineCreation();
-        if (!engine) throw 'engine should not be null.';
-        window.scene = createScene();};
-        initFunction().then(() => {sceneToRender = scene        
-            engine.runRenderLoop(function () {
-                if (sceneToRender && sceneToRender.activeCamera) {
-                    sceneToRender.render();
-                }
-            });
+        window.engine = await asyncEngineCreation();
+        if (!engine) throw "engine should not be null.";
+        window.scene = createScene();
+      };
+      initFunction().then(() => {
+        sceneToRender = scene;
+        engine.runRenderLoop(function () {
+          if (sceneToRender && sceneToRender.activeCamera) {
+            sceneToRender.render();
+          }
         });
+      });
 
-        // Resize
-        window.addEventListener("resize", function () {
-            engine.resize();
-        });
+      // Resize
+      window.addEventListener("resize", function () {
+        engine.resize();
+      });
     </script>
-</body>
+  </body>
 </html>
