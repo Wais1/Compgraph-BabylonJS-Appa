@@ -80,8 +80,8 @@
         // Define gravity and physics engine
         scene.enablePhysics();
 
-        // Set gravity to 0
-        scene.getPhysicsEngine().setGravity(new BABYLON.Vector3(0, 0, 0));
+        // Set gravity to -3
+        scene.getPhysicsEngine().setGravity(new BABYLON.Vector3(0, -3, 0));
 
         var light = new BABYLON.PointLight(
           "Omni",
@@ -464,6 +464,40 @@
           window.addEventListener("resize", function () {
             engine.resize();
           });
+        });
+
+        // Snowballs
+        // Material
+        var myMaterial = new BABYLON.StandardMaterial("myMaterial", scene);
+        myMaterial.diffuseColor = new BABYLON.Color3(0.53, 0.7, 0.72);
+        myMaterial.specularColor = new BABYLON.Color3(0.22, 0.27, 0.67);
+        myMaterial.emissiveColor = new BABYLON.Color3(0.42, 0.47, 0.68);
+        myMaterial.ambientColor = new BABYLON.Color3(0.23, 0.98, 0.53);
+
+        // Spawn
+        var y = 200;
+        for (var index = 0; index < 700; index++) {
+          var sphere = BABYLON.Mesh.CreateSphere("Sphere0", 16, 3, scene);
+          sphere.material = myMaterial;
+
+          sphere.position = new BABYLON.Vector3(Math.random() * 2000 - 1000, y, Math.random() * 1000 - 500);
+
+          sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1 }, scene);
+
+          sphere.checkCollisions = true;
+
+          y += 20;
+        }
+
+        // Snowball Physics
+        sphere.checkCollisions = true;
+        sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 10, restitution: 0.7 }, scene);
+        sphere.physicsImpostor.applyImpulse(new BABYLON.Vector3(10, 10, 10), sphere.getAbsolutePosition());
+
+        sphere.physicsImpostor.registerOnPhysicsCollide(myGround.physicsImpostor, function (main, collided) {
+          main.object.material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+          main.object.material.specularColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+          main.object.material.ambientColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
         });
 
         scene.debugLayer.show();
