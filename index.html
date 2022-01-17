@@ -46,7 +46,20 @@
   </head>
   <body>
     <canvas id="renderCanvas"></canvas>
+    <!-- Import Howler Audio library with CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script src="path/to/howler.js"></script>
+
     <script>
+    // Use copyright free music:  Oriente Music composed and recorded by Oak Studios Creative Commons - Attribution ND 4.0
+    var music = new Howl({
+        src: ['/audio/Oriente.mp3'],
+         volume: 0.3
+        });
+    
+    // Play music track
+    music.play();
+
       var canvas = document.getElementById("renderCanvas");
       var engine = null;
 
@@ -239,6 +252,12 @@
             appa.position.x = hero.position.x;
             appa.position.y = hero.position.y;
             appa.position.z = hero.position.z;
+
+            // Rotate appa to camera angle
+            appa.rotation.x = camera.cameraRotation.x
+            appa.rotation.y = camera.cameraRotation.y
+            console.log(camera.cameraRotation.y)
+            appa.rotation.z = camera.cameraRotation.z
           }
 
           pointer.position = camera.getTarget();
