@@ -150,11 +150,11 @@
         const moveAppaAI = (object, startPosition) => {
             // Animation method for AI. Start where previously ended.
             const moveDirection = Math.random() < 0.5? 1 : -1;
-            const randomDistance = Math.random() * (50 - 10) + 10
+            const randomDistance = Math.random() * (80 - 10) + 10
             const moveVar = Math.floor(Math.random() * (3 - 1 + 1) + 1)
             // Determine new end position
             // startPosition.x * randomDistance * moveDirection
-            var endPosition = moveVar === 1? new BABYLON.Vector3(0, 0, randomDistance * moveDirection) : new BABYLON.Vector3( randomDistance * moveDirection, 0, 0) ;
+            var endPosition = moveVar === 1? new BABYLON.Vector3(0, 0, (randomDistance + startPosition.z ) * moveDirection) : new BABYLON.Vector3(  (randomDistance + startPosition.x )  * moveDirection, 0, 0) ;
 
             
             
