@@ -51,17 +51,18 @@
     <script src="path/to/howler.js"></script>
 
     <script>
-    // Use copyright free music:  Oriente Music composed and recorded by Oak Studios Creative Commons - Attribution ND 4.0
-    var music = new Howl({
-        src: ['/audio/Oriente.mp3'],
-         volume: 0.3
-        });
-    
-    // Play music track
-    music.play();
+        // Use copyright free music:  Oriente Music composed and recorded by Oak Studios Creative Commons - Attribution ND 4.0
+        var music = new Howl({
+            src: ['/audio/Oriente.mp3'],
+            volume: 0.3,
+            });
+        
+        // Play music track on repeat
+        music.play();
+        music.on('end', () => music.play())
 
-      var canvas = document.getElementById("renderCanvas");
-      var engine = null;
+    var canvas = document.getElementById("renderCanvas");
+    var engine = null;
 
       // var scene = null;
       // var sceneToRender = null;
@@ -72,6 +73,7 @@
           disableWebGL2Support: false,
         });
       };
+      
       function createScene() {
         var scene = new BABYLON.Scene(engine);
 
@@ -106,6 +108,9 @@
         // Declare global appa var
         var appa;
 
+        // Declare AI appa
+        var appaAI;
+
         // Initialize glboal RGB emissive variables to adjust dynamically on Appa's movement
         var r = 0;
         var b = 0;
@@ -139,10 +144,54 @@
             // Update new skybox emissive color
             skyboxMaterial.emissiveColor = new BABYLON.Color3(r, g, b);
             console.log(skyboxMaterial.emissiveColor);
+        }        
+
+        // Move appa AI in random directions, recursively on end of animation.
+        const moveAppaAI = (object, startPosition) => {
+            // Animation method for AI. Start where previously ended.
+            const moveDirection = Math.random() < 0.5? 1 : -1;
+            const randomDistance = Math.random() * (50 - 10) + 10
+            const moveVar = Math.floor(Math.random() * (3 - 1 + 1) + 1)
+            // Determine new end position
+            // startPosition.x * randomDistance * moveDirection
+            var endPosition = moveVar === 1? new BABYLON.Vector3(0, 0, randomDistance * moveDirection) : new BABYLON.Vector3( randomDistance * moveDirection, 0, 0) ;
+
+            
+            
+            console.log(`RandomDistance position ${startPosition.x}  Random distance ${randomDistance} MoveDirection ${moveDirection} `)
+            // Second param (end) is random num, first param (start) is where we ended.
+            BABYLON.Animation.CreateAndStartAnimation("anim", object, "position", 1.5, 20, startPosition, endPosition, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, null, ()=> moveAppaAI(object, endPosition));
+            
+        }
+
+  
+        // Adds appa AI slowly, and limited by a variable
+        const appaLimit = 10;
+        var appaCounter = 0;
+        const addAppaAI = () => {
+            if (appa && appaCounter < appaLimit) {
+                // Create an appa clone
+                const appaAI = appa.clone("appa2");
+
+                // Random initial position for appa AI
+                const randomPosX = Math.random() * (300 - 10) + 10
+                const randomPosZ = Math.random() * (300 - 10) + 10
+                appaAI.position.x = randomPosX;
+                appaAI.position.z = randomPosZ;
+
+                // Animation method for AI
+                var startPosition = new BABYLON.Vector3(11, 1 , 11);
+
+                // Move the appa randomly andrecursively
+                moveAppaAI(appaAI, startPosition)
+            }
+            appaCounter += 1;
         }
 
         // Updates updateBackgroundColor every half a second
         const interval = setInterval(updateBackgroundColor, 500);
+
+        const addAppas = setInterval(addAppaAI, 1000)
 
 
         //Hero
@@ -253,11 +302,11 @@
             appa.position.y = hero.position.y;
             appa.position.z = hero.position.z;
 
-            // Rotate appa to camera angle
+            // Rotate appa to camera angle (does not wokr yet)
             appa.rotation.x = camera.cameraRotation.x
             appa.rotation.y = camera.cameraRotation.y
-            console.log(camera.cameraRotation.y)
             appa.rotation.z = camera.cameraRotation.z
+
           }
 
           pointer.position = camera.getTarget();
@@ -368,20 +417,6 @@
           false
         );
 
-        // // Fog
-        // scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
-        // //BABYLON.Scene.FOGMODE_NONE;
-        // //BABYLON.Scene.FOGMODE_EXP;
-        // //BABYLON.Scene.FOGMODE_EXP2;
-        // //BABYLON.Scene.FOGMODE_LINEAR;
-
-        // scene.fogColor = new BABYLON.Color3(0.95, 0.95, 0.95);
-        // scene.fogDensity = 0.01;
-
-        //Only if LINEAR
-        //scene.fogStart = 20.0;
-        //scene.fogEnd = 60.0;
-
         // Skybox
         var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene);
 
@@ -409,8 +444,8 @@
           alpha += 0.02;
         });
 
-        //     // Load Appa model
-        //     // here the doc for Load function: //doc.babylonjs.com/api/classes/babylon.sceneloader#load
+        // Load Appa model
+        //  here the doc for Load function: //doc.babylonjs.com/api/classes/babylon.sceneloader#load
         BABYLON.SceneLoader.Append("", "appa.glb", scene, function () {
           scene.createDefaultCamera(false, false, false);
 
@@ -430,25 +465,6 @@
             engine.resize();
           });
         });
-
-        // // // The first parameter can be used to specify which mesh to import. Here we import all meshes
-        // BABYLON.SceneLoader.ImportMesh("", "./", "appa.glb", scene, function (newMeshes) {
-        //     appa = newMeshes[0];
-        //     appa.position.x = 6.0;
-        //     appa.position.y = 6.0;
-        //     appa.position.z = 3.0;
-
-        //     const myMesh1 = scene.getMeshByName("__root__");
-        //     myMesh1.position.x = 100;
-
-        //     camera.target = appa;
-        // });
-
-        // BABYLON.SceneLoader.ImportMeshAsync("", "/relative path/", "myFile").then((result) => {
-        //     result.meshes[1].position.x = 20;
-        //     const myMesh1 = scene.getMeshByName("myMesh_1");
-        //     myMesh1.rotation.y = Math.PI / 2;
-        // });
 
         scene.debugLayer.show();
 
